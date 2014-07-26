@@ -16,7 +16,7 @@
 ### Parent delegation model
 即双亲委托机制, 具体来说classloader load class的时候总是先去委托parent classloader来load,当没有load成功才回自己尝试去load。具体可参见ClassLoader的实现
 
-```java
+{% highlight java %}
 protected synchronized Class<?> loadClass(String name, boolean resolve) 
 throws ClassNotFoundException{
 	// First, check if the class has already been loaded
@@ -43,7 +43,7 @@ throws ClassNotFoundException{
 	}
 	return c;
 }
-```
+{% endhighlight %}
 
 我们自定义Class Loader都需要继承ClassLoader, 并且通常只需要实现protected Class<?> findClass(String name)方法，而不需要override loadeClass方法，这里就是一个TemplateMethod设计模式。但是当然后很多场景就不遵循标准的ParentDelegation Model, 而去override这个方法，比如本文会讲到的Tomcat Class loading机制。另外注意loadClass方法通过synchronized来保证线程安全。
 
@@ -51,7 +51,7 @@ throws ClassNotFoundException{
 
 从Tomcat的入口类Bootstrap 可以看到main方法里面实例化了Bootstrap对象并且调用了Bootstrap.init()。而init里面会去初始化classLoader
 
-```java
+{% highlight java %}
 private void initClassLoaders() {
 
     commonLoader = createClassLoader("common", null);
@@ -62,12 +62,12 @@ private void initClassLoaders() {
     catalinaLoader = createClassLoader("server", commonLoader);
     sharedLoader = createClassLoader("shared", commonLoader);
 }
-```
+{% endhighlight %}
 
 这里面会创建三个classLoader,分别是commonLoader, catalinaLoader和sharedLoader。并且commomLoader会作为sharedLoader和catalinaLoader的parent loader.
 
 
-```java
+{% highlight java %}
 private ClassLoader createClassLoader(String name, ClassLoader parent)
         throws Exception {
         //从conf/catalina.properties读取
@@ -90,7 +90,7 @@ private ClassLoader createClassLoader(String name, ClassLoader parent)
         return classLoader;
 
     }
-```
+{% endhighlight %}
 而当我们打开$CATALINE_HOME/conf/catalina.properties会发现里面就只定义了common.loader
 
 common.loader=${catalina.base}/lib,${catalina.base}/lib/*.jar,${catalina.home}/lib,${catalina.home}/lib/*.jar
@@ -99,7 +99,7 @@ common.loader=${catalina.base}/lib,${catalina.base}/lib/*.jar,${catalina.home}/l
 
 OK 我们继续从头开始。当我们启动Tomcat的适合其实是运行的Bootstrap.main()方法。并且传入start参数。BootStrap会在init好上面的classLoader之后用catalina.loader去加载Catalina类，并且用反射调用Catalina.setParentClassLoader(sharedLoader), 这里需要注意的是代码里面会把catalinaLoader作为当前线程的ContextClassLoader.
 
-```java
+{% highlight java %}
  public void init()
         throws Exception
     {
@@ -129,7 +129,7 @@ OK 我们继续从头开始。当我们启动Tomcat的适合其实是运行的Bo
         catalinaDaemon = startupInstance;
 
     }
-```
+{% endhighlight %}
 我们知道Tomcat会解析server.xml并且实例化相应的Class，那这些Class是怎么load进来的呢。
 
 
