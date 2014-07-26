@@ -1,0 +1,15 @@
+# Site settings
+title: Tea In Coffee
+email: jianpro_foxmail_com
+description: "blog tech stuff"
+baseurl: ""
+url: "http://yourdomain.com"
+twitter_username: lovocas
+github_username:  moujian
+
+# Build settings
+markdown: kramdown
+permalink: pretty
+
+kramdown:
+  input: GFM
